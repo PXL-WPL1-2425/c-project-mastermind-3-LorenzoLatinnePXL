@@ -1,0 +1,66 @@
+﻿<Window x:Class="Mastermind.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Mastermind"
+        mc:Ignorable="d"
+        Title="Mastermind" Height="800" Width="750" Loaded="Window_Loaded" KeyDown="ToggleDebug" Background="White">
+    <DockPanel >
+        <DockPanel.Background>
+            <ImageBrush ImageSource="/assets/pokemon-background.jpg"/>
+        </DockPanel.Background>
+        <Menu DockPanel.Dock="Top" Height="18">
+            <MenuItem Header="Bestand">
+                <MenuItem Header="Nieuw spel" Click="NieuwSpel_Click" ></MenuItem>
+                <MenuItem Header="Highscores" Click="Highscores_Click"></MenuItem>
+                <MenuItem Header="Afsluiten" Click="Afsluiten_Click"></MenuItem>
+            </MenuItem>
+            <MenuItem Header="Instellingen">
+                <MenuItem Header="Aantal pogingen" Click="AantalPogingen_Click" ></MenuItem>
+            </MenuItem>
+        </Menu>
+        <Grid x:Name="solutionAndTimerGrid" DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="solutionTextBox" Grid.Column="0" Height="30px" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsEnabled="False"/>
+            <TextBox x:Name="timerTextBox" Grid.Column="1" Height="30px" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsEnabled="False" />
+        </Grid>
+        <Grid x:Name="gameGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="100"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Label x:Name="attemptsLabel" Grid.Row="0" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"></Label>
+            <Button Name="checkButton" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="Check code" BorderThickness="1,1,1,1" Click="checkButton_Click" Height="25px" Margin="5,5,5,5" Width="250px"/>
+            <Label x:Name="scoreLabel" Grid.Row="0" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"></Label>
+
+            <ComboBox Name="ComboBoxOption1" Grid.Row="1" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectionChanged="ComboBoxOption_SelectionChanged"></ComboBox>
+            <ComboBox Name="ComboBoxOption2" Grid.Row="1" Grid.Column="1" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectionChanged="ComboBoxOption_SelectionChanged"></ComboBox>
+            <ComboBox Name="ComboBoxOption3" Grid.Row="1" Grid.Column="2" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectionChanged="ComboBoxOption_SelectionChanged"></ComboBox>
+            <ComboBox Name="ComboBoxOption4" Grid.Row="1" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectionChanged="ComboBoxOption_SelectionChanged"></ComboBox>
+
+            <Label Name="colorLabel1" Grid.Column="0" Grid.Row="2" Width="100" Height="100"/>
+            <Label Name="colorLabel2" Grid.Column="1" Grid.Row="2" Width="100" Height="100"/>
+            <Label Name="colorLabel3" Grid.Column="2" Grid.Row="2" Width="100" Height="100"/>
+            <Label Name="colorLabel4" Grid.Column="3" Grid.Row="2" Width="100" Height="100"/>
+
+
+            <Grid x:Name="HistoryGrid" Grid.Row="3" Grid.ColumnSpan="4">
+            </Grid>
+
+        </Grid>
+    </DockPanel>
+</Window>
