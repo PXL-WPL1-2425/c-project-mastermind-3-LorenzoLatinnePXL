@@ -373,17 +373,20 @@ namespace Mastermind
             {
                 score -= 2;
                 imageLabel.BorderThickness = new Thickness(0);
+                imageLabel.ToolTip = "Wrong Pokémon.";
             }
             else if (solution.Contains(combobox.Text) && !ColorInCorrectPosition(combobox, position))
             {
                 score -= 1;
                 imageLabel.BorderBrush = Brushes.Wheat;
                 imageLabel.BorderThickness = new Thickness(2);
+                imageLabel.ToolTip = "Right Pokémon, wrong position";
             }
             else
             {
                 imageLabel.BorderBrush = Brushes.DarkRed;
                 imageLabel.BorderThickness = new Thickness(2);
+                imageLabel.ToolTip = "Right Pokémon, right position";
             }
         }
 
