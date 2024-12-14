@@ -96,15 +96,18 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="assets\bulbasaur.png" />
-    <Resource Include="assets\charmander.png" />
-    <Resource Include="assets\eevee.png" />
-    <Resource Include="assets\meowth.png" />
-    <Resource Include="assets\pikachu.png" />
-    <Resource Include="assets\squirtle.png" />
+    <Resource Include="assets\choices\bulbasaur.png" />
+    <Resource Include="assets\choices\charmander.png" />
+    <Resource Include="assets\choices\eevee.png" />
+    <Resource Include="assets\choices\meowth.png" />
+    <Resource Include="assets\choices\pikachu.png" />
+    <Resource Include="assets\choices\squirtle.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="assets\pokemon-background.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="assets\idle\slowbro.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

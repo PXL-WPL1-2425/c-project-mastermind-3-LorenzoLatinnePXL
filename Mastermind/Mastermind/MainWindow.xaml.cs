@@ -34,11 +34,15 @@ namespace Mastermind
         Label[] labels;
         
         BitmapImage[] imageArray = new BitmapImage[6];
+        BitmapImage[] idleImage = new BitmapImage[1];
         BitmapImage[] solutionImages = new BitmapImage[4];
 
         List<string> playerNames = new List<string>();
 
+        List<int> possibleOptions = new List<int>();
+
         string[] imagePaths;
+        string[] idlePokemons;
         string[] solution = new string[4];
         string[] options = { "Bulbasaur", "Charmander", "Eevee", "Meowth", "Pikachu", "Squirtle" };
         string[] highscores;
@@ -78,11 +82,17 @@ namespace Mastermind
             StartGame();
 
             // Get pictures from assets folder and put them in the BitmapImages array.
-            imagePaths = Directory.GetFiles("../../assets", "*.png");
+            imagePaths = Directory.GetFiles("../../assets/choices", "*.png");
+            idlePokemons = Directory.GetFiles("../../assets/idle", "*.png");
 
             for (int i = 0; i < imagePaths.Length; i++)
             {
                 imageArray[i] = new BitmapImage(new Uri(imagePaths[i], UriKind.Relative));
+            }
+
+            for (int i = 0; i < idlePokemons.Length; i++)
+            {
+                idleImage[i] = new BitmapImage(new Uri(idlePokemons[i], UriKind.Relative));
             }
         }
 
@@ -92,6 +102,11 @@ namespace Mastermind
         private void StartGame()
         {
             playerNames.Clear();
+            playerNameGrid.ColumnDefinitions.Clear();
+            playerNameGrid.Children.Clear();
+
+            ResetPossibleOptionsList();
+
             amountOfPlayers = 0;
             playerIndex = 0;
             highscores = new string[15];
@@ -275,6 +290,7 @@ namespace Mastermind
             if (attempts != maxAttempts && !hasWon)
             {
                 CheckIfPlayerHasWon();
+                IfCorrectPositionRemoveOptionFromHints();
                 attempts++;
                 CreateRow();
                 UpdateLabels();
@@ -446,7 +462,17 @@ namespace Mastermind
             {
                 ComboBox combobox = comboBoxes[i];
                 Label playerGuess = new Label();
-                playerGuess.Background = labels[i].Background;
+                if (combobox.SelectedIndex != -1 || combobox.SelectedItem != null)
+                {
+                    playerGuess.Background = labels[i].Background;
+                } 
+                else
+                {
+                    ImageBrush idleGuess = new ImageBrush();
+                    idleGuess.ImageSource = idleImage[0];
+                    playerGuess.Background = idleGuess;
+                }
+                
                 playerGuess.Margin = new Thickness(1);
 
                 // Change the size of images depending on how many guesses a player can make.
@@ -485,6 +511,8 @@ namespace Mastermind
                 HistoryGrid.Children.Add(playerGuess);
 
                 CheckCode(combobox, playerGuess, i);
+
+
             }
             currentRow++;
         }
@@ -525,40 +553,9 @@ namespace Mastermind
         private void ChooseMaxAttempts()
         {
 
-            bool isValidAttempts = int.TryParse(Interaction.InputBox("Amount of attempts: ", "Choose between 3 and 20."), out maxAttempts);
-
-            while (!isValidAttempts || maxAttempts < 3 || maxAttempts > 20 || maxAttempts < attempts)
-            {
-                isValidAttempts = int.TryParse(Interaction.InputBox("Amount of attempts: ", "Choose between 3 and 20."), out maxAttempts);
-            }
-
-            if (maxAttempts > 8 && !splitScreen)
-            {
-                HistoryGrid.ColumnDefinitions.Clear();
-                for (int i = 0; i < 8; i++)
-                {
-                    ColumnDefinition columnDefinition = new ColumnDefinition();
-                    columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-                    HistoryGrid.ColumnDefinitions.Add(columnDefinition);
-                }
-                splitScreen = true;
-            }
-            else if (maxAttempts <= 8 || splitScreen)
-            {
-                HistoryGrid.ColumnDefinitions.Clear();
-                for (int i = 0; i < 4; i++)
-                {
-                    ColumnDefinition columnDefinition = new ColumnDefinition();
-                    columnDefinition.Width = new GridLength(1, GridUnitType.Star);
-                    HistoryGrid.ColumnDefinitions.Add(columnDefinition);
-                }
-                splitScreen = false;
-            }
-
-            attemptsLabel.Content = $"Attempt: {attempts} / {maxAttempts}";
-            attemptsLabel.Foreground = attempts >= (maxAttempts * 0.8) ? Brushes.Red : attempts >= (maxAttempts * 0.5) ? Brushes.Orange : Brushes.Black;
-            attemptsLabel.FontWeight = attempts >= (maxAttempts * 0.8) ? FontWeights.Bold : attempts >= (maxAttempts * 0.5) ? FontWeights.DemiBold : FontWeights.Normal;
-            scoreLabel.Content = $"Score: {score} / 100";
+            maxAttempts = GetValidAmountOfAttempts();
+            UpdateGridLayout(maxAttempts);
+            UpdateLabels();
         }
 
         /// <summary>
@@ -624,6 +621,66 @@ namespace Mastermind
             timer.Start();
         }
 
+        private void buyHintButton_Click(object sender, RoutedEventArgs e)
+        {
+            PauseCountdown();
+
+            MessageBoxResult hintChoice = MessageBox.Show(
+                "Choose your hint:\n" +
+                "\"Yes\" - Pokémon in correct position (-25 points)\n" +
+                "\"No\" - Pokémon present but position unknown (-15 points)\n" +
+                "\"Cancel\" - No hint.",
+                "Hint Options",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Question);
+
+            if (hintChoice == MessageBoxResult.Yes)
+            {
+                // Hint for correct image in the correct position
+                int position = rnd.Next(0, possibleOptions.Count);
+                if (possibleOptions.Count > 0 && score >= 25)
+                {
+                    int correctPosition = possibleOptions[position];
+                    MessageBox.Show($"Correct Pokémon in position {correctPosition + 1}: {solution[correctPosition]}");
+                    score -= 25;
+
+                    // Remove this position from future hints
+                    possibleOptions.Remove(correctPosition);
+                }
+                else if (score < 25)
+                {
+                    MessageBox.Show("Not enough points to spend.");
+                }
+                else
+                {
+                    MessageBox.Show("No more hints to show.");
+                }
+
+            }
+            else if (hintChoice == MessageBoxResult.No && score >= 15)
+            {
+                if (score >= 15)
+                {
+                    // Hint for a correct image, but not the position
+                    string hintImage = solution[rnd.Next(0, solution.Length)];
+                    MessageBox.Show($"A Pokémon present in the solution: {hintImage}");
+                    score -= 15;
+                }
+                else if (score < 15)
+                {
+                    MessageBox.Show("Not enough points to spend.");
+                }
+            }
+            else
+            {
+                // No hint selected
+                MessageBox.Show("No hint selected.");
+            }
+
+            StartCountdown();
+            UpdateLabels();
+        }
+
         private void ResetGame()
         {
             attempts = 0;
@@ -633,6 +690,7 @@ namespace Mastermind
             solutionTextBox.Visibility = Visibility.Hidden;
             hasWon = false;
             GenerateRandomCode();
+            ResetPossibleOptionsList();
 
             UpdateLabels();
             ClearGridSection();
@@ -660,6 +718,7 @@ namespace Mastermind
             Label playerNameLabel = new Label();
             playerNameLabel.HorizontalContentAlignment = HorizontalAlignment.Center;
             playerNameLabel.VerticalContentAlignment = VerticalAlignment.Center;
+            playerNameLabel.FontSize = 10;
 
             playerNameGrid.ColumnDefinitions.Add(newPlayerColumn);
             Grid.SetColumn(playerNameLabel, playerNames.Count - 1);
@@ -676,7 +735,7 @@ namespace Mastermind
                 // Get the column of the current child
                 int column = Grid.GetColumn(child);
 
-                // Check if the column matches the target index
+                // Check if the column matches the player index
                 if (column == playerIndex)
                 {
                     // Set the label's foreground color to green, background to white and weight to bold
@@ -691,6 +750,77 @@ namespace Mastermind
                     child.Background = Brushes.Transparent;
                     child.FontWeight = FontWeights.Normal;
                 }
+            }
+        }
+
+        private int GetValidAmountOfAttempts()
+        {
+            int attemptsInput;
+            bool isValid;
+            do
+            {
+                string input = Interaction.InputBox("Amount of attempts: ", "Choose between 3 and 20.");
+                isValid = int.TryParse(input, out attemptsInput) && attemptsInput >= 3 && attemptsInput <= 20 && attemptsInput >= attempts;
+            } while (!isValid);
+
+            return attemptsInput;
+        }
+
+        private void UpdateGridLayout(int maxAttempts)
+        {
+            int columnCount;
+            // Decide the number of columns based on maxAttempts
+            if (maxAttempts > 8)
+                columnCount = 8;
+            else
+                columnCount = 4;
+
+            // Clear and recreate the grid columns
+            HistoryGrid.ColumnDefinitions.Clear();
+            for (int i = 0; i < columnCount; i++)
+            {
+                ColumnDefinition columnDefinition = new ColumnDefinition();
+                columnDefinition.Width = new GridLength(1, GridUnitType.Star);
+                HistoryGrid.ColumnDefinitions.Add(columnDefinition);
+            }
+
+            // Set splitScreen true or false based on the maxAttempts;
+            if (maxAttempts > 8)
+                splitScreen = true;
+            else
+                splitScreen = false;
+        }
+
+        private void ResetPossibleOptionsList()
+        {
+            possibleOptions = new List<int> { 0, 1, 2, 3 };
+        }
+
+        private void IfCorrectPositionRemoveOptionFromHints()
+        {
+            if (ComboBoxOption1.Text == solution[0])
+            {
+                possibleOptions.Remove(0);
+            }
+
+            if (ComboBoxOption2.Text == solution[1])
+            {
+                possibleOptions.Remove(1);
+            }
+
+            if (ComboBoxOption3.Text == solution[2]) 
+            {
+                possibleOptions.Remove(2);
+            }
+
+            if (ComboBoxOption4.Text == solution[3])
+            {
+                possibleOptions.Remove(3);
+            }
+
+            foreach (int i in possibleOptions)
+            {
+                Console.WriteLine(i);
             }
         }
     }

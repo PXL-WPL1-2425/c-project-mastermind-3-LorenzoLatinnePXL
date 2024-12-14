@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Mastermind"
         mc:Ignorable="d"
-        Title="Mastermind" Height="800" Width="750" Loaded="Window_Loaded" KeyDown="ToggleDebug" Background="White">
+        Title="Mastermind" Height="850" Width="750" Loaded="Window_Loaded" KeyDown="ToggleDebug" Background="White">
     <DockPanel >
         <DockPanel.Background>
             <ImageBrush ImageSource="/assets/pokemon-background.jpg"/>
@@ -20,7 +20,7 @@
                 <MenuItem Header="Choose amount of attempts" Click="AmountAttempts_Click" ></MenuItem>
             </MenuItem>
         </Menu>
-        <Grid x:Name="playerNameGrid" DockPanel.Dock="Top" Height="35">
+        <Grid x:Name="playerNameGrid" DockPanel.Dock="Top" Height="25">
             
         </Grid>
         <Grid x:Name="solutionAndTimerGrid" DockPanel.Dock="Bottom">
@@ -47,7 +47,10 @@
             </Grid.ColumnDefinitions>
 
             <Label x:Name="attemptsLabel" Grid.Row="0" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"></Label>
-            <Button Name="checkButton" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Content="Check code" BorderThickness="1,1,1,1" Click="checkButton_Click" Height="25px" Margin="5,5,5,5" Width="250px"/>
+
+            <Button x:Name="buyHintButton" Grid.Column="1" Height="25px" Margin="5,5,5,5" Content="Buy a hint" BorderThickness="1,1,1,1" Click="buyHintButton_Click" ></Button>
+            <Button x:Name="checkButton" Grid.Column="2" Height="25px" Margin="5,5,5,5" Content="Check code" BorderThickness="1,1,1,1" Click="checkButton_Click"/>
+            
             <Label x:Name="scoreLabel" Grid.Row="0" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"></Label>
 
             <ComboBox Name="ComboBoxOption1" Grid.Row="1" Grid.Column="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectionChanged="ComboBoxOption_SelectionChanged"></ComboBox>
@@ -56,8 +59,8 @@
             <ComboBox Name="ComboBoxOption4" Grid.Row="1" Grid.Column="3" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" SelectionChanged="ComboBoxOption_SelectionChanged"></ComboBox>
 
             <Label Name="colorLabel1" Grid.Column="0" Grid.Row="2" Width="100" Height="100"/>
-            <Label Name="colorLabel2" Grid.Column="1" Grid.Row="2" Width="100" Height="100"/>
             <Label Name="colorLabel3" Grid.Column="2" Grid.Row="2" Width="100" Height="100"/>
+            <Label Name="colorLabel2" Grid.Column="1" Grid.Row="2" Width="100" Height="100"/>
             <Label Name="colorLabel4" Grid.Column="3" Grid.Row="2" Width="100" Height="100"/>
 
 
