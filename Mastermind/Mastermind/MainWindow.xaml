@@ -20,6 +20,9 @@
                 <MenuItem Header="Choose amount of attempts" Click="AmountAttempts_Click" ></MenuItem>
             </MenuItem>
         </Menu>
+        <Grid x:Name="playerNameGrid" DockPanel.Dock="Top" Height="15">
+            
+        </Grid>
         <Grid x:Name="solutionAndTimerGrid" DockPanel.Dock="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>

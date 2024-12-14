@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -91,7 +92,9 @@ namespace Mastermind
         private void StartGame()
         {
             playerNames.Clear();
+            playerIndex = 0;
             highscores = new string[15];
+            addNewPlayer = true;
 
             do
             {
@@ -101,6 +104,7 @@ namespace Mastermind
                     MessageBox.Show("Choose a username.", "Invalid username");
                     username = Interaction.InputBox("Username: ", "Choose your username");
                 }
+
                 playerNames.Add(username);
 
                 MessageBoxResult result =
@@ -123,12 +127,11 @@ namespace Mastermind
             debugMode = false;
             solutionTextBox.Visibility = Visibility.Hidden;
             hasWon = false;
-            InitalizeColors();
+            GenerateRandomCode();
 
-            for (int i = 0; i < solutionImages.Length; i++)
-            {
-                solutionImages[i] = new BitmapImage();
-            }
+            CreateImagesToChooseFromInCode();
+
+
 
             UpdateLabels();
             ClearGridSection();
@@ -155,14 +158,6 @@ namespace Mastermind
                 }
             }
             return comboBoxes;
-        }
-
-        /// <summary>
-        /// Initializes the colors used for the solution by generating random colors.
-        /// </summary>
-        private void InitalizeColors()
-        {
-            GenerateRandomColor();
         }
 
         /// <summary>
@@ -257,7 +252,7 @@ namespace Mastermind
         /// <summary>
         /// Generates a random solution for the game by selecting random images within the amount of options.
         /// </summary>
-        private void GenerateRandomColor()
+        private void GenerateRandomCode()
         {
             for (int i = 0; i < 4; i++)
             {
@@ -282,19 +277,66 @@ namespace Mastermind
                 UpdateLabels();
                 StartCountdown();
 
-                if (attempts == maxAttempts && !hasWon)
+                if (attempts == maxAttempts && !hasWon && playerIndex + 1 < playerNames.Count)
                 {
-                    highscores[playerIndex] = $"{username} - {attempts}/{maxAttempts} attempts - {score}/100";
+                    highscores[playerIndex] =
+                        $"{playerNames[playerIndex]}" +
+                        $" - {attempts}/{maxAttempts} attempts" +
+                        $" - {score}/100";
                     checkButton.Content = "Game Over";
-                    MessageBoxResult result = MessageBox.Show($"Game Over.\nThe code was:\n{String.Join(", ", solution)}", "Game over", MessageBoxButton.OK, MessageBoxImage.Question);
+                    MessageBoxResult result = MessageBox.Show($"Game Over.\n" +
+                        $"The code was: {String.Join(", ", solution)}\n" +
+                        $"Next up is {playerNames[playerIndex + 1]}",
+                        $"{playerNames[playerIndex]}",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Question);
                     playerIndex++;
+                    ResetGame();
+
                 }
-                else if (hasWon)
+                else if (attempts == maxAttempts && !hasWon && playerIndex + 1 >= playerNames.Count)
                 {
-                    highscores[playerIndex] = $"{username} - {attempts}/{maxAttempts} attempts - {score}/100";
+                    highscores[playerIndex] =
+                        $"{playerNames[playerIndex]}" +
+                        $" - {attempts}/{maxAttempts} attempts" +
+                        $" - {score}/100";
+                    checkButton.Content = "Game Over";
+                    MessageBoxResult result = MessageBox.Show($"Game Over.\n" +
+                        $"The code was: {String.Join(", ", solution)}\n" +
+                        $"{playerNames[playerIndex]} was the last player.",
+                        $"{playerNames[playerIndex]}",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Question);
+                }
+                else if (hasWon && playerIndex + 1 < playerNames.Count)
+                {
+                    highscores[playerIndex] =
+                        $"{playerNames[playerIndex]}" +
+                        $" - {attempts}/{maxAttempts} attempts" +
+                        $" - {score}/100";
                     checkButton.Content = "Victory";
-                    MessageBoxResult result = MessageBox.Show($"You won in {attempts} attempts.", "You won", MessageBoxButton.OK, MessageBoxImage.Question);
+                    MessageBoxResult result = MessageBox.Show($"You won in {attempts} attempts.\n" +
+                        $"The code was: {String.Join(", ", solution)}\n" +
+                        $"Next up is {playerNames[playerIndex + 1]}",
+                        "You won",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Question);
                     playerIndex++;
+                    ResetGame();
+                }
+                else if (hasWon && playerIndex + 1 >= playerNames.Count)
+                {
+                    highscores[playerIndex] =
+                        $"{playerNames[playerIndex]}" +
+                        $" - {attempts}/{maxAttempts} attempts" +
+                        $" - {score}/100";
+                    checkButton.Content = "Victory";
+                    MessageBoxResult result = MessageBox.Show($"You won in {attempts} attempts.\n" +
+                        $"The code was: {String.Join(", ", solution)}\n" +
+                        $"{playerNames[playerIndex]} was the last player.",
+                        "You won",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Question);
                 }
             }
         }
@@ -345,7 +387,7 @@ namespace Mastermind
         {
             PauseCountdown();
             sb.Clear();
-            for (int i = 0; i < playerIndex; i++)
+            for (int i = 0; i <= playerIndex; i++)
             {
                 sb.Append($"{highscores[i]}\n");
             }
@@ -577,6 +619,34 @@ namespace Mastermind
         private void ResumeCountdown()
         {
             timer.Start();
+        }
+
+        private void ResetGame()
+        {
+            attempts = 0;
+            currentRow = 0;
+            score = 100;
+            debugMode = false;
+            solutionTextBox.Visibility = Visibility.Hidden;
+            hasWon = false;
+            GenerateRandomCode();
+
+            UpdateLabels();
+            ClearGridSection();
+            ClearComboBoxSelection(labels);
+            checkButton.Content = "Check code";
+            if (attempts != maxAttempts)
+            {
+                StartCountdown();
+            }
+        }
+
+        private void CreateImagesToChooseFromInCode()
+        {
+            for (int i = 0; i < solutionImages.Length; i++)
+            {
+                solutionImages[i] = new BitmapImage();
+            }
         }
     }
 }
