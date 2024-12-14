@@ -27,17 +27,27 @@ namespace Mastermind
         // Variables
         StringBuilder sb = new StringBuilder();
         Random rnd = new Random();
+
         ComboBox[] comboBoxes;
+        
         Label[] labels;
-        string[] imagePaths;
+        
         BitmapImage[] imageArray = new BitmapImage[6];
         BitmapImage[] solutionImages = new BitmapImage[4];
+
+        List<string> playerNames = new List<string>();
+
+        string[] imagePaths;
         string[] solution = new string[4];
         string[] options = { "Bulbasaur", "Charmander", "Eevee", "Meowth", "Pikachu", "Squirtle" };
-        string[] highscores = new string[15];
+        string[] highscores;
+
         string username;
+
         int attempts, maxAttempts, currentRow, score, playerIndex;
+
         bool debugMode, hasWon;
+        bool addNewPlayer = true;
         bool splitScreen = false;
 
         DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Normal);
@@ -59,7 +69,11 @@ namespace Mastermind
         /// <param name="e">Event data for the Loaded event.</param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            // Defines the tick of the timer.
+            timer.Tick += Timer_Tick;
+
             playerIndex = 0;
+
             StartGame();
 
             // Get pictures from assets folder and put them in the BitmapImages array.
@@ -76,13 +90,30 @@ namespace Mastermind
         /// </summary>
         private void StartGame()
         {
+            playerNames.Clear();
+            highscores = new string[15];
 
-            username = Interaction.InputBox("Username: ", "Choose your username");
-            while (string.IsNullOrEmpty(username))
+            do
             {
-                MessageBox.Show("Choose a username.", "Invalid username");
                 username = Interaction.InputBox("Username: ", "Choose your username");
-            }
+                while (string.IsNullOrEmpty(username))
+                {
+                    MessageBox.Show("Choose a username.", "Invalid username");
+                    username = Interaction.InputBox("Username: ", "Choose your username");
+                }
+                playerNames.Add(username);
+
+                MessageBoxResult result =
+                    MessageBox.Show("Would you like to add another player?", "Add another player", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.No)
+                {
+                    addNewPlayer = false;
+                }
+
+            } while (addNewPlayer);
+
+
 
             attempts = 0;
             maxAttempts = 0;
@@ -150,32 +181,6 @@ namespace Mastermind
             {
                 solutionTextBox.Visibility = Visibility.Hidden;
                 debugMode = false;
-            }
-        }
-
-        /// <summary>
-        /// Changes the background image of a label based on the ComboBox selection.
-        /// </summary>
-        /// <param name="ComboBox">The ComboBox whose selection determines the label background image.</param>
-        /// <returns>A BitmapImage representing the selected background image.</returns>
-        private BitmapImage ChangeLabelBackgroundColor(ComboBox ComboBox)
-        {
-            switch (ComboBox.SelectedIndex)
-            {
-                case 0:
-                    return imageArray[0];
-                case 1:
-                    return imageArray[1];
-                case 2:
-                    return imageArray[2];
-                case 3:
-                    return imageArray[3];
-                case 4:
-                    return imageArray[4];
-                case 5:
-                    return imageArray[5];
-                default:
-                    return null;
             }
         }
 
@@ -322,17 +327,17 @@ namespace Mastermind
         }
 
         /// <summary>
-        /// Handles the Afsluiten menuItem click event to close the program.
+        /// Handles the Close menuItem click event to close the program.
         /// </summary>
         /// <param name="sender">The menuItem in "Bestand" that's named "Afsluiten"</param>
         /// <param name="e">"The actual clicking on the menuItem</param>
-        private void Afsluiten_Click(object sender, RoutedEventArgs e)
+        private void CloseMenuItem_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
         /// <summary>
-        /// 
+        /// Handles the Highscores menuItem click event to show the highscores.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -350,21 +355,21 @@ namespace Mastermind
         }
 
         /// <summary>
-        /// 
+        /// Starts a new game when the player clicks on "New game" in the File dropdown menu.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void NieuwSpel_Click(object sender, RoutedEventArgs e)
+        private void NewGame_Click(object sender, RoutedEventArgs e)
         {
             StartGame();
         }
 
         /// <summary>
-        /// 
+        /// Prompts the user for a number as the amount of attempts to guess the correct code.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void AantalPogingen_Click(object sender, RoutedEventArgs e)
+        private void AmountAttempts_Click(object sender, RoutedEventArgs e)
         {
             PauseCountdown();
             ChooseMaxAttempts();
@@ -512,25 +517,24 @@ namespace Mastermind
         }
 
         /// <summary>
-        /// 
+        /// Set the remaining time to the total available time of each round. Start the timer with an interval of 100 milliseconds. Sets the Timer_Tick function as what happens every 100 milliseconds.
         /// </summary>
         private void StartCountdown()
         {
             remainingTime = totalTime;
             timer.Start();
             timer.Interval = TimeSpan.FromMilliseconds(100);
-            timer.Tick += Timer_Tick;
         }
 
         /// <summary>
-        /// 
+        /// Subtracts the timer interval from the remaining time. When remaining time reaches zero, the checkButton_Click() is called for an attempt.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Timer_Tick(object sender, EventArgs e)
         {
             remainingTime -= timer.Interval;
-            timerTextBox.Text = $"Timer: {remainingTime.TotalSeconds.ToString("N2")} / 10";
+            timerTextBox.Text = $"Timer: {(int)remainingTime.TotalSeconds} / 10";
 
             if (attempts < maxAttempts)
             {
@@ -552,16 +556,15 @@ namespace Mastermind
         }
 
         /// <summary>
-        /// 
+        /// Stops the countdown and removes the tick from the timer.
         /// </summary>
         private void StopCountdown()
         {
             timer.Stop();
-            timer.Tick -= Timer_Tick;
         }
 
         /// <summary>
-        /// 
+        /// Pauses the countdown timer.
         /// </summary>
         private void PauseCountdown()
         {
@@ -569,7 +572,7 @@ namespace Mastermind
         }
 
         /// <summary>
-        /// 
+        /// Resumes the countdown timer.
         /// </summary>
         private void ResumeCountdown()
         {
