@@ -30,9 +30,9 @@ namespace Mastermind
         Random rnd = new Random();
 
         ComboBox[] comboBoxes;
-        
+
         Label[] labels;
-        
+
         BitmapImage[] imageArray = new BitmapImage[6];
         BitmapImage[] idleImage = new BitmapImage[1];
         BitmapImage[] solutionImages = new BitmapImage[4];
@@ -50,10 +50,10 @@ namespace Mastermind
         string username;
 
         int attempts, maxAttempts, currentRow, score, playerIndex, amountOfPlayers;
+        int maxScore = 100;
 
         bool debugMode, hasWon;
         bool addNewPlayer = true;
-        bool splitScreen = false;
 
         DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.Normal);
         TimeSpan totalTime = TimeSpan.FromSeconds(10);
@@ -104,8 +104,6 @@ namespace Mastermind
             playerNames.Clear();
             playerNameGrid.ColumnDefinitions.Clear();
             playerNameGrid.Children.Clear();
-
-            ResetPossibleOptionsList();
 
             amountOfPlayers = 0;
             playerIndex = 0;
@@ -468,14 +466,14 @@ namespace Mastermind
                 if (combobox.SelectedIndex != -1 || combobox.SelectedItem != null)
                 {
                     playerGuess.Background = labels[i].Background;
-                } 
+                }
                 else
                 {
                     ImageBrush idleGuess = new ImageBrush();
                     idleGuess.ImageSource = idleImage[0];
                     playerGuess.Background = idleGuess;
                 }
-                
+
                 playerGuess.Margin = new Thickness(1);
 
                 // Change the size of images depending on how many guesses a player can make.
@@ -555,7 +553,6 @@ namespace Mastermind
         /// </summary>
         private void ChooseMaxAttempts()
         {
-
             maxAttempts = GetValidAmountOfAttempts();
             UpdateGridLayout(maxAttempts);
             UpdateLabels();
@@ -693,7 +690,6 @@ namespace Mastermind
             solutionTextBox.Visibility = Visibility.Hidden;
             hasWon = false;
             GenerateRandomCode();
-            ResetPossibleOptionsList();
 
             UpdateLabels();
             ClearGridSection();
@@ -726,7 +722,8 @@ namespace Mastermind
             playerNameGrid.ColumnDefinitions.Add(newPlayerColumn);
             Grid.SetColumn(playerNameLabel, playerNames.Count - 1);
 
-            playerNameLabel.Content = username;
+            playerNameLabel.Content = $"{username}";
+
 
             playerNameGrid.Children.Add(playerNameLabel);
         }
@@ -741,6 +738,7 @@ namespace Mastermind
                 // Check if the column matches the player index
                 if (column == playerIndex)
                 {
+                    child.Content = $"{playerNames[playerIndex]} - {attempts}/{maxAttempts} - {score}/{maxScore}";
                     // Set the label's foreground color to green, background to white and weight to bold
                     child.Foreground = Brushes.White;
                     child.Background = Brushes.Green;
@@ -786,17 +784,6 @@ namespace Mastermind
                 columnDefinition.Width = new GridLength(1, GridUnitType.Star);
                 HistoryGrid.ColumnDefinitions.Add(columnDefinition);
             }
-
-            // Set splitScreen true or false based on the maxAttempts;
-            if (maxAttempts > 8)
-                splitScreen = true;
-            else
-                splitScreen = false;
-        }
-
-        private void ResetPossibleOptionsList()
-        {
-            possibleOptions = new List<int> { 0, 1, 2, 3 };
         }
 
         private void IfCorrectPositionRemoveOptionFromHints()
@@ -811,7 +798,7 @@ namespace Mastermind
                 possibleOptions.Remove(1);
             }
 
-            if (ComboBoxOption3.Text == solution[2]) 
+            if (ComboBoxOption3.Text == solution[2])
             {
                 possibleOptions.Remove(2);
             }
@@ -819,11 +806,6 @@ namespace Mastermind
             if (ComboBoxOption4.Text == solution[3])
             {
                 possibleOptions.Remove(3);
-            }
-
-            foreach (int i in possibleOptions)
-            {
-                Console.WriteLine(i);
             }
         }
     }
