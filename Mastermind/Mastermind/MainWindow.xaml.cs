@@ -45,7 +45,7 @@ namespace Mastermind
 
         string username;
 
-        int attempts, maxAttempts, currentRow, score, playerIndex;
+        int attempts, maxAttempts, currentRow, score, playerIndex, amountOfPlayers;
 
         bool debugMode, hasWon;
         bool addNewPlayer = true;
@@ -92,6 +92,7 @@ namespace Mastermind
         private void StartGame()
         {
             playerNames.Clear();
+            amountOfPlayers = 0;
             playerIndex = 0;
             highscores = new string[15];
             addNewPlayer = true;
@@ -106,6 +107,7 @@ namespace Mastermind
                 }
 
                 playerNames.Add(username);
+                AddPlayerToPlayerNameGrid(username);
 
                 MessageBoxResult result =
                     MessageBox.Show("Would you like to add another player?", "Add another player", MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -234,6 +236,7 @@ namespace Mastermind
             attemptsLabel.FontWeight = attempts >= (maxAttempts * 0.8) ? FontWeights.Bold : attempts >= (maxAttempts * 0.5) ? FontWeights.DemiBold : FontWeights.Normal;
             scoreLabel.Content = $"Score: {score} / 100";
             solutionTextBox.Text = String.Join(", ", solution);
+            ShowActivePlayer();
         }
 
         /// <summary>
@@ -646,6 +649,48 @@ namespace Mastermind
             for (int i = 0; i < solutionImages.Length; i++)
             {
                 solutionImages[i] = new BitmapImage();
+            }
+        }
+
+        private void AddPlayerToPlayerNameGrid(string username)
+        {
+            ColumnDefinition newPlayerColumn = new ColumnDefinition();
+            newPlayerColumn.Width = new GridLength(1, GridUnitType.Star);
+
+            Label playerNameLabel = new Label();
+            playerNameLabel.HorizontalContentAlignment = HorizontalAlignment.Center;
+            playerNameLabel.VerticalContentAlignment = VerticalAlignment.Center;
+
+            playerNameGrid.ColumnDefinitions.Add(newPlayerColumn);
+            Grid.SetColumn(playerNameLabel, playerNames.Count - 1);
+
+            playerNameLabel.Content = username;
+
+            playerNameGrid.Children.Add(playerNameLabel);
+        }
+
+        private void ShowActivePlayer()
+        {
+            foreach (Label child in playerNameGrid.Children)
+            {
+                // Get the column of the current child
+                int column = Grid.GetColumn(child);
+
+                // Check if the column matches the target index
+                if (column == playerIndex)
+                {
+                    // Set the label's foreground color to green, background to white and weight to bold
+                    child.Foreground = Brushes.White;
+                    child.Background = Brushes.Green;
+                    child.FontWeight = FontWeights.Bold;
+                }
+                else
+                {
+                    // Set the label's foreground color to default, black, background transparent and weight back to normal.
+                    child.Foreground = Brushes.Black;
+                    child.Background = Brushes.Transparent;
+                    child.FontWeight = FontWeights.Normal;
+                }
             }
         }
     }
