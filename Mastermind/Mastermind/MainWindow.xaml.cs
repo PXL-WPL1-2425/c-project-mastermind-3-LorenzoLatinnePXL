@@ -49,7 +49,7 @@ namespace Mastermind
 
         string username;
 
-        int attempts, maxAttempts, currentRow, score, playerIndex, amountOfPlayers;
+        int attempts, maxAttempts, currentRow, score, playerIndex;
         int maxScore = 100;
 
         bool debugMode, hasWon;
@@ -105,7 +105,6 @@ namespace Mastermind
             playerNameGrid.ColumnDefinitions.Clear();
             playerNameGrid.Children.Clear();
 
-            amountOfPlayers = 0;
             playerIndex = 0;
             highscores = new string[15];
             addNewPlayer = true;
@@ -143,6 +142,11 @@ namespace Mastermind
             solutionTextBox.Visibility = Visibility.Hidden;
             hasWon = false;
             GenerateRandomCode();
+
+            for (int i = 0; i < solution.Length; i++)
+            {
+                possibleOptions.Add(i);
+            }
 
             CreateImagesToChooseFromInCode();
 
