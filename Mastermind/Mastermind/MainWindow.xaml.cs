@@ -143,10 +143,7 @@ namespace Mastermind
             hasWon = false;
             GenerateRandomCode();
 
-            for (int i = 0; i < solution.Length; i++)
-            {
-                possibleOptions.Add(i);
-            }
+            ResetHintPossibleOptions();
 
             CreateImagesToChooseFromInCode();
 
@@ -694,6 +691,7 @@ namespace Mastermind
             solutionTextBox.Visibility = Visibility.Hidden;
             hasWon = false;
             GenerateRandomCode();
+            ResetHintPossibleOptions();
 
             UpdateLabels();
             ClearGridSection();
@@ -810,6 +808,14 @@ namespace Mastermind
             if (ComboBoxOption4.Text == solution[3])
             {
                 possibleOptions.Remove(3);
+            }
+        }
+
+        private void ResetHintPossibleOptions()
+        {
+            for (int i = 0; i < solution.Length; i++)
+            {
+                possibleOptions.Add(i);
             }
         }
     }
